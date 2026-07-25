@@ -12,7 +12,7 @@ spec:
     path: charts/mongodb
     helm:
       valueFiles:
-        - ../envs/mongodb/values.yaml # relative to path → resolves to charts/envs/dev/mongodb.yaml
+        - ../mongodb/values.yaml # relative to path → resolves to charts/envs/dev/mongodb.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: production # pre-created by Terraform (platform/)
