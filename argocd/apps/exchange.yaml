@@ -1,0 +1,31 @@
+# exchange Application — deploys charts/exchange into the production namespace.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: exchange
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/AlexanderMinko/ssp-exchange-helm.git
+    targetRevision: main
+    path: charts/exchange
+    helm:
+      valueFiles:
+        - ../envs/dev/exchange.yaml # relative to path → resolves to charts/envs/dev/exchange.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production # pre-created by Terraform (platform/)
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false # production is Terraform-owned — don't let Argo CD create it
+  # 12.6: the HPA owns replicas (the Deployment omits it). Ignore any live replicas diff so
+  # Argo CD's selfHeal never reverts an HPA scale-up.
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas

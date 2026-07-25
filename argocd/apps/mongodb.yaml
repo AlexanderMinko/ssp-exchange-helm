@@ -1,0 +1,24 @@
+# mongodb Application — deploys charts/mongodb into the production namespace.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mongodb
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/AlexanderMinko/ssp-exchange-helm.git
+    targetRevision: main
+    path: charts/mongodb
+    helm:
+      valueFiles:
+        - ../envs/dev/mongodb.yaml # relative to path → resolves to charts/envs/dev/mongodb.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production # pre-created by Terraform (platform/)
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false # production is Terraform-owned — don't let Argo CD create it

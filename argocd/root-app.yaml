@@ -1,0 +1,22 @@
+# root-app.yaml — the "App-of-Apps" root. Apply this ONCE by hand to bootstrap GitOps:
+#   kubectl apply -n argocd -f argocd/root-app.yaml
+# It watches argocd/apps/ in this repo and creates the child Applications found there. After this,
+# you never `kubectl apply` an Application again — you add a file to argocd/apps/ and `git push`.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/AlexanderMinko/ssp-exchange-helm.git
+    targetRevision: main
+    path: argocd/apps # the directory of child Application manifests
+  destination:
+    server: https://kubernetes.default.svc # this same cluster
+    namespace: argocd # child Applications are created in the argocd namespace
+  syncPolicy:
+    automated:
+      prune: true # delete child Apps that are removed from git
+      selfHeal: true # revert manual kubectl edits back to the git state
