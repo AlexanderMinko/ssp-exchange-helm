@@ -12,7 +12,7 @@ spec:
     path: charts/exchange
     helm:
       valueFiles:
-        - ../envs/dev/exchange.yaml # relative to path → resolves to charts/envs/dev/exchange.yaml
+        - ../envs/exchange/values.yaml # relative to path → resolves to charts/envs/dev/exchange.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: production # pre-created by Terraform (platform/)
