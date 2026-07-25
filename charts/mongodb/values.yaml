@@ -1,0 +1,24 @@
+# Defaults for the mongodb chart — deployed as its own release, into the same namespace as exchange.
+
+# Naming: fullnameOverride pins the Service name so the exchange app reaches it at a stable DNS name
+# (mongodb:27017). Unset it for release-scoped names (<release>-mongodb).
+nameOverride: ""
+fullnameOverride: mongodb
+
+enabled: true
+image: mongo:7
+storageClassName: gp3 # dynamic, reclaimPolicy Delete
+storageSize: 2Gi
+resources:
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+externalSecrets:
+  enabled: true
+  clusterSecretStore: aws-secretsmanager
+  remoteKey: eks-dev/exchange/mongodb # same source secret the exchange chart uses
+  refreshInterval: 1h

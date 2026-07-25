@@ -1,0 +1,14 @@
+# envs/prod/mongodb.yaml — PROD overrides for the mongodb release.
+# Layered on top of charts/mongodb/values.yaml. Only override what differs from the baseline.
+# NOTE: this is still single-node Mongo — fine for learning, NOT a real prod DB posture
+# (prod would want a replica set / managed DocumentDB). Sizing here is illustrative.
+# Deploy: helm upgrade --install mongodb charts/mongodb -n production -f charts/envs/prod/mongodb.yaml
+
+storageSize: 20Gi
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "1"
+    memory: "1Gi"

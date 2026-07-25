@@ -1,0 +1,6 @@
+# envs/dev/mongodb.yaml — DEV overrides for the mongodb release.
+# Layered on top of charts/mongodb/values.yaml. Only override what differs from the baseline.
+# The baseline is already dev-sized (2Gi, small requests), so dev's delta is minimal.
+# Deploy: helm upgrade --install mongodb charts/mongodb -n production -f charts/envs/dev/mongodb.yaml
+
+storageSize: 2Gi

@@ -1,0 +1,8 @@
+{{ include "exchange.fullname" . }} (SSP/Exchange) deployed to namespace {{ .Release.Namespace }}.
+
+Exposed via the shared Gateway {{ .Values.route.gatewayNamespace }}/{{ .Values.route.gatewayName }}.
+ALB address:
+  kubectl -n {{ .Values.route.gatewayNamespace }} get gateway {{ .Values.route.gatewayName }} -o jsonpath='{.status.addresses[0].value}'
+
+Check rollout:
+  kubectl -n {{ .Release.Namespace }} get deploy,hpa,httproute -l app.kubernetes.io/instance={{ .Release.Name }}

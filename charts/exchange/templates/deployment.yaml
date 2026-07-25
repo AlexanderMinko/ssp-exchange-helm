@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "exchange.fullname" . }}
+  labels:
+    {{- include "exchange.labels" . | nindent 4 }}
+spec:
+  # replicas omitted — the HPA owns it (ArgoCD-safe, Phase 12)
+  selector:
+    matchLabels:
+      {{- include "exchange.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "exchange.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: exchange
+          image: "{{ .Values.exchange.image.repository }}:{{ .Values.exchange.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.exchange.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "exchange.fullname" . }}-config
+            - secretRef:
+                name: {{ include "exchange.fullname" . }}-secret
+          resources:
+            {{- toYaml .Values.exchange.resources | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.exchange.containerPort }}
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.exchange.containerPort }}
+            initialDelaySeconds: 30
+            periodSeconds: 10

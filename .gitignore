@@ -1,0 +1,32 @@
+# .gitignore — SSP-Exchange GitOps config repo (Helm charts + env values + Argo CD manifests).
+# This repo is the source of truth Argo CD syncs; keep it to SOURCE only — no build artifacts,
+# no secrets, no local render dumps.
+
+# --- Helm build artifacts (regenerated, not source) ---
+# Vendored subchart tarballs unpacked into a chart's charts/ dir. Our charts are INDEPENDENT
+# (no dependencies), but ignore these so a stray `helm dependency build` never commits copies.
+charts/*/charts/
+*.tgz
+
+# --- Secrets: NEVER commit (secrets live in AWS Secrets Manager, synced by ESO) ---
+# ExternalSecret manifests ARE fine to commit — they hold only REFERENCES, not values.
+# This is a defensive net for accidental secret-bearing files; real secrets should never be here.
+.env
+*.env
+*.dec
+secrets.yaml
+secret-values.yaml
+*-secret-values.yaml
+
+# --- Local render / debug output ---
+# e.g. `helm template ... > rendered.yaml` while eyeballing manifests locally.
+rendered.yaml
+*.rendered.yaml
+
+# --- OS / editor cruft ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.bak
+*.tmp

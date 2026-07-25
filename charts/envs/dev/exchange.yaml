@@ -1,0 +1,15 @@
+# envs/dev/exchange.yaml — DEV overrides for the exchange release.
+# Layered on top of charts/exchange/values.yaml. Only override what differs from the baseline.
+# Deploy: helm upgrade --install exchange charts/exchange -n production -f charts/envs/dev/exchange.yaml
+
+exchange:
+  image:
+    tag: main # matches what CI pushes on a main build (CI/ArgoCD will own this later)
+  autoscaling:
+    minReplicas: 1
+    maxReplicas: 3
+
+# Observability off in dev until LGTM is up (Phase 13 flip).
+config:
+  OTLP_METRICS_ENABLED: "false"
+  TRACING_ENABLED: "false"

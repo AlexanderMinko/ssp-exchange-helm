@@ -1,0 +1,54 @@
+# Default values for the exchange chart. Override per-env with -f values-<env>.yaml.
+# Namespace via `helm -n <ns>`. Deploy charts/mongodb separately INTO THE SAME NAMESPACE
+# (the app reaches Mongo at the `mongodb` Service DNS — see config.MONGO_HOSTS).
+
+# Naming: fullnameOverride pins the resource names (keeps the Service/route/secret names stable).
+# Unset it for release-scoped names (<release>-exchange).
+nameOverride: ""
+fullnameOverride: exchange
+
+externalSecrets:
+  enabled: true
+  clusterSecretStore: aws-secretsmanager
+  remoteKey: eks-dev/exchange/mongodb # same source secret the mongodb chart uses
+  refreshInterval: 1h
+
+exchange:
+  image:
+    repository: 140023370575.dkr.ecr.eu-central-1.amazonaws.com/eks-dev/app
+    tag: main
+  containerPort: 8080
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+  autoscaling: # replicas is HPA-owned (omitted from the Deployment)
+    minReplicas: 1
+    maxReplicas: 3
+    cpuUtilization: 70
+
+# Non-secret config → ConfigMap (consumed via envFrom).
+config:
+  MONGO_HOSTS: "mongodb:27017" # the mongodb Service (deployed by charts/mongodb, same namespace)
+  MONGO_DATABASE_NAME: "ssp-exchange"
+  MONGO_PARAMS: "?authSource=admin"
+  SPRING_THREADS_VIRTUAL_ENABLED: "true"
+  EXCHANGE_CONFIG_REFRESH_MS: "30000"
+  EXCHANGE_BIDDER_CONNECT_TIMEOUT_MS: "100"
+  EXCHANGE_BIDDER_READ_TIMEOUT_MS: "1000"
+  MANAGEMENT_ENDPOINTS_EXPOSURE: "health,info,metrics"
+  OTLP_METRICS_ENABLED: "false"
+  OTLP_ENDPOINT: "http://localhost:4318"
+  TRACING_ENABLED: "false"
+  TRACING_SAMPLING_PROBABILITY: "1.0"
+
+# The app does NOT own a Gateway/ALB — it attaches an HTTPRoute to the SHARED gateway (platform/).
+route:
+  enabled: true
+  gatewayName: shared
+  gatewayNamespace: edge
+  sectionName: http
+  hostnames: [] # set per-app hostnames once multiple apps share the gateway (avoid route collisions)

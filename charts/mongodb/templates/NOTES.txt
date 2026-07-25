@@ -1,0 +1,7 @@
+{{ include "mongodb.fullname" . }} (MongoDB) deployed to namespace {{ .Release.Namespace }}.
+
+In-cluster address (headless Service): {{ include "mongodb.fullname" . }}:27017
+Root creds come from the ESO-synced Secret {{ include "mongodb.fullname" . }}-secret.
+
+Check rollout:
+  kubectl -n {{ .Release.Namespace }} get statefulset,pvc -l app.kubernetes.io/instance={{ .Release.Name }}

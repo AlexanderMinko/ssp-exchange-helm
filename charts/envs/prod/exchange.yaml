@@ -1,0 +1,29 @@
+# envs/prod/exchange.yaml — PROD overrides for the exchange release.
+# Layered on top of charts/exchange/values.yaml. Only override what differs from the baseline.
+# Deploy: helm upgrade --install exchange charts/exchange -n production -f charts/envs/prod/exchange.yaml
+
+exchange:
+  image:
+    tag: exchange-0.1.0 # pin to a released, tested tag (NOT a floating/latest tag)
+  resources: # prod runs bigger than the baseline
+    requests:
+      cpu: "1"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "2Gi"
+  autoscaling:
+    minReplicas: 3 # headroom + survive a node loss without a cold scale-up
+    maxReplicas: 10
+    cpuUtilization: 70
+
+# Observability on in prod.
+config:
+  OTLP_METRICS_ENABLED: "true"
+  TRACING_ENABLED: "true"
+  TRACING_SAMPLING_PROBABILITY: "0.1" # sample 10% in prod (1.0 would be too costly under load)
+
+# Give prod its own hostname so routes don't collide once other apps share the gateway.
+route:
+  hostnames:
+    - exchange.example.com # TODO: replace with the real prod DNS name
